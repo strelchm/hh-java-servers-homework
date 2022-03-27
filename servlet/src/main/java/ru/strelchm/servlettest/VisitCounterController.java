@@ -68,8 +68,8 @@ public class VisitCounterController extends HttpServlet {
         @Override
         public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
             PrintWriter writer = response.getWriter();
-            Optional<Cookie> cookie = request.getCookies() == null ? Optional.empty() :
-                    Arrays.stream(request.getCookies()).filter(v -> v.getName().equals("hh-auth")).findFirst();
+            Optional<Cookie> cookie = Optional.ofNullable(request.getCookies())
+                    .flatMap(cookies -> Arrays.stream(cookies).filter(v -> v.getName().equals("hh-auth")).findFirst());
             if (cookie.isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 writer.print("hh-auth cookie not found");
