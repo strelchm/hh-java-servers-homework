@@ -10,11 +10,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @WebServlet
 public class VisitCounterController extends HttpServlet {
-    private static final AtomicInteger VISIT_TOTAL_COUNTER = new AtomicInteger(0);
+    private static final CounterStorage counterStorage = new CounterStorage();
 
     /**
      * возвращает счетчик
@@ -24,7 +23,7 @@ public class VisitCounterController extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
 
         PrintWriter writer = response.getWriter();
-        writer.print(VISIT_TOTAL_COUNTER.get());
+        writer.print(counterStorage.getCounter());
         writer.flush();
     }
 
@@ -36,7 +35,7 @@ public class VisitCounterController extends HttpServlet {
      */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        VISIT_TOTAL_COUNTER.incrementAndGet();
+        counterStorage.incrementAndGet();
         response.setStatus(HttpServletResponse.SC_OK);
 
         PrintWriter writer = response.getWriter();
@@ -52,7 +51,7 @@ public class VisitCounterController extends HttpServlet {
      */
     @Override
     public void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        VISIT_TOTAL_COUNTER.decrementAndGet();
+        counterStorage.decrementAndGet();
         response.setStatus(HttpServletResponse.SC_OK);
 
         PrintWriter writer = response.getWriter();
@@ -79,7 +78,7 @@ public class VisitCounterController extends HttpServlet {
             } else {
                 response.setStatus(HttpServletResponse.SC_OK);
                 writer.print("OK");
-                VISIT_TOTAL_COUNTER.set(0);
+                counterStorage.clear();
             }
             writer.flush();
         }

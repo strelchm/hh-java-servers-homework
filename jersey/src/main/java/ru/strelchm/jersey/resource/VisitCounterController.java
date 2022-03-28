@@ -2,13 +2,15 @@ package ru.strelchm.jersey.resource;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Path("/counter")
 public class VisitCounterController {
-    private static final AtomicInteger VISIT_TOTAL_COUNTER = new AtomicInteger(0);
+
+    private CounterStorage counterStorage;
+
+    public VisitCounterController(CounterStorage counterStorage) {
+        this.counterStorage = counterStorage;
+    }
 
     /**
      * возвращает счетчик
@@ -17,8 +19,8 @@ public class VisitCounterController {
     @Path(value = "/")
     @Produces("application/json")
     public Response getCounter() {
-        GetCounterResponse resume = new GetCounterResponse(LocalDateTime.now(), VISIT_TOTAL_COUNTER.get());
-        return Response.ok(resume).build();
+        GetCounterResponse counterResponse = counterStorage.getCounter();
+        return Response.ok(counterResponse).build();
     }
 
     /**
@@ -27,7 +29,7 @@ public class VisitCounterController {
     @POST
     @Path(value = "/")
     public Response incrementCounter() {
-        VISIT_TOTAL_COUNTER.incrementAndGet();
+        counterStorage.incrementAndGet();
         return Response.ok("OK").build();
     }
 
@@ -37,7 +39,7 @@ public class VisitCounterController {
     @DELETE
     @Path(value = "/")
     public Response decrementCounter() {
-        VISIT_TOTAL_COUNTER.decrementAndGet();
+        counterStorage.decrementAndGet();
         return Response.ok("OK").build();
     }
 
@@ -49,7 +51,7 @@ public class VisitCounterController {
         } else if (cookie.length() <= 10) {
             return Response.status(Response.Status.FORBIDDEN.getStatusCode()).entity("hh-auth cookie is wrong").build();
         } else {
-            VISIT_TOTAL_COUNTER.set(0);
+            counterStorage.clear();
             return Response.ok("OK").build();
         }
     }
